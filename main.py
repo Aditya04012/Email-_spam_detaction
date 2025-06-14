@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-df = pd.read_csv('C:/Users/ADITYA/Downloads/spam.csv', encoding='latin1')
+df = pd.read_csv('spam.csv', encoding='latin1')
 
 X = df.iloc[:, 1]
 y = df.iloc[:, 0].map({'ham': 0, 'spam': 1})
