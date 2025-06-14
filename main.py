@@ -4,13 +4,16 @@ from pydantic import BaseModel
 import re
 import html
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 df = pd.read_csv('spam.csv', encoding='latin1')[['v1', 'v2']]
 df.columns = ['label', 'text']
-df.dropna(inplace=True)
 df['label'] = df['label'].map({'ham': 0, 'spam': 1})
+df.dropna(inplace=True)
+
 
 def clean_text(text):
     text = text.lower()
@@ -32,21 +35,29 @@ X_train, X_test, y_train, y_test = train_test_split(X_vectorized, y, test_size=0
 clf = LogisticRegression(class_weight='balanced')
 clf.fit(X_train, y_train)
 
+y_pred = clf.predict(X_test)
+accuracy_score(y_test, y_pred)
+
 app = FastAPI()
 
 class Item(BaseModel):
     prompt: str
 
 @app.get('/')
-def read_root():
-    return {"message": "Spam detection API is working"}
+def get():
+    return {"message": "spam detection API is working"}
 
 @app.post('/predict')
-def predict_spam(item: Item):
-    cleaned = clean_text(item.prompt)
-    vectorized = vectorizer.transform([cleaned])
-    prediction = clf.predict(vectorized)[0]
-    return {"prediction": "Spam" if prediction == 1 else "Not Spam"}
+def get(req: Item):
+    user_input = req.prompt
+    new_user = clean_text(user_input)
+    input_vector = vectorizer.transform([new_user])
+    prediction = clf.predict(input_vector)[0]
+    label = 'Spam' if prediction == 1 else 'Not Spam'
+    return {"prediction": label}
+
+
+
 
 
 
